@@ -15,8 +15,9 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "author") // One author can write many books
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true) // One author can write many books
     private List<Book> books;
 }

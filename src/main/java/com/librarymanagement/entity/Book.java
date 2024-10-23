@@ -1,6 +1,7 @@
 package com.librarymanagement.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Entity
@@ -10,12 +11,16 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
-    private String isbn;
-    private int publicationYear;
+    @Column(nullable = false)
+    private  String title;
+    @Column(nullable = false, unique = true)
+    @Size(min = 10, max = 13)
+    private  String isbn;
+    @Column(name = "publication_year")
+    private int finalpublicationYear;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
     private Author author;
 
 }
