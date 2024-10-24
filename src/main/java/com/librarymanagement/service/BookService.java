@@ -9,6 +9,8 @@ import com.librarymanagement.repository.AuthorRepository;
 import com.librarymanagement.repository.BookRepository;
 import com.librarymanagement.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,12 +29,21 @@ public class BookService {
         this.authorRepository = authorRepository;
     }
 
-    public List<BookDTO> getAllBooks() {
-        List<Book> books = bookRepository.findAll();
-        return books
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
+    public Page<BookDTO> getAllBooks(String title, String authorName, Pageable pageable) {
+        Page<Book> books;
+
+        if (title != null && authorName != null) {
+            books = bookRepository.findByTitleAndAuthorName(title, authorName, pageable);
+        } else if (title != null) {
+            books = bookRepository.findByTitleContainingIgnoreCase(title, pageable);
+        } else if (authorName != null) {
+            books = bookRepository.findByAuthorNameContainingIgnoreCase(authorName, pageable);
+        } else {
+            books = bookRepository.findAll(pageable);
+        }
+
+        // Convert to DTOs
+        return books.map(mapper::toDTO);
     }
 
     public BookDTO addBook(BookDTO bookDTO) {

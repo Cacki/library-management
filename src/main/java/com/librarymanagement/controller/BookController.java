@@ -4,6 +4,10 @@ import com.librarymanagement.dto.BookDTO;
 import com.librarymanagement.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +25,17 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookDTO>> getAllBooks() {
-        List<BookDTO> books = service.getAllBooks();
+    public ResponseEntity<Page<BookDTO>> getAllBooks(
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "authorName", required = false) String authorName,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "title") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        Page<BookDTO> books = service.getAllBooks(title, authorName, pageable);
+
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
