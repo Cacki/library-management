@@ -1,6 +1,6 @@
 package com.librarymanagement.controller;
 
-import com.librarymanagement.entity.User;
+import com.librarymanagement.data.entity.User;
 import com.librarymanagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

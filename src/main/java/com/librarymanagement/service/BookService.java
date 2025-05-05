@@ -1,19 +1,21 @@
 package com.librarymanagement.service;
 
+import com.librarymanagement.data.entity.Author;
+import com.librarymanagement.data.entity.Book;
+import com.librarymanagement.data.repository.AuthorRepository;
+import com.librarymanagement.data.repository.BookRepository;
 import com.librarymanagement.dto.BookDTO;
-import com.librarymanagement.entity.Author;
-import com.librarymanagement.entity.Book;
+import com.librarymanagement.exception.DuplicateResourceException;
 import com.librarymanagement.exception.ResourceNotFoundException;
 import com.librarymanagement.mapper.BookMapper;
-import com.librarymanagement.repository.AuthorRepository;
-import com.librarymanagement.repository.BookRepository;
+import com.librarymanagement.specification.BookSpecification;
 import com.librarymanagement.util.Messages;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class BookService {
@@ -41,19 +43,37 @@ public class BookService {
         } else {
             books = bookRepository.findAll(pageable);
         }
-
         // Convert to DTOs
         return books.map(mapper::toDTO);
     }
 
-    public BookDTO addBook(BookDTO bookDTO) {
-        Author author = authorRepository.findByName(bookDTO.getAuthorName())
+    public Page<BookDTO> searchBooks(String title, String authorName, Integer year, Pageable pageable) {
+        Specification<Book> spec = Specification.where(BookSpecification.hasTitle(title))
+                .and(BookSpecification.hasAuthorName(authorName))
+                .and(year != null ? BookSpecification.publishedAfter(year) : null);
+
+        Page<Book> books = bookRepository.findAll(spec, pageable);
+        return books.map(mapper::toDTO);
+    }
+
+
+    @Transactional
+    public BookDTO addBook(BookDTO bookDTO) throws DuplicateResourceException {
+        Book book = validateAddBook(bookDTO);
+        book = bookRepository.save(book);
+        return mapper.toDTO(book);
+    }
+
+    private Book validateAddBook(BookDTO bookDTO) throws DuplicateResourceException, ResourceNotFoundException {
+        Author author = authorRepository.findByName(bookDTO.getAuthorName().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format(Messages.AUTHOR_NOT_FOUND, bookDTO.getAuthorName())));
 
-        Book book = mapper.toEntity(bookDTO, author);
-        book = bookRepository.save(book);
-        return mapper.toDTO(book);
+        if (bookRepository.existsByTitleAndAuthor(bookDTO.getTitle(), author)) {
+            throw new DuplicateResourceException(Messages.BOOK_ALREADY_EXIST);
+        }
+
+        return mapper.toEntity(bookDTO, author);
     }
 
     public BookDTO getBookById(Long id) {
@@ -63,6 +83,7 @@ public class BookService {
         return mapper.toDTO(book);
     }
 
+    @Transactional
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -71,6 +92,7 @@ public class BookService {
         bookRepository.delete(book);
     }
 
+    @Transactional
     public BookDTO updateBook(Long id, BookDTO bookDTO) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(

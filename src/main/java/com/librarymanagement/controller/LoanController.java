@@ -1,6 +1,6 @@
 package com.librarymanagement.controller;
 
-import com.librarymanagement.entity.Loan;
+import com.librarymanagement.data.entity.Loan;
 import com.librarymanagement.service.LoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.librarymanagement.service;
 
-import com.librarymanagement.entity.Author;
-import com.librarymanagement.repository.AuthorRepository;
+import com.librarymanagement.data.entity.Author;
+import com.librarymanagement.data.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

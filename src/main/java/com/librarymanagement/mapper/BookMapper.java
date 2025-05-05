@@ -1,8 +1,8 @@
 package com.librarymanagement.mapper;
 
 import com.librarymanagement.dto.BookDTO;
-import com.librarymanagement.entity.Author;
-import com.librarymanagement.entity.Book;
+import com.librarymanagement.data.entity.Author;
+import com.librarymanagement.data.entity.Book;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -12,7 +12,15 @@ public interface BookMapper {
     BookDTO toDTO(Book book);
 
     @Mapping(source = "authorName", target = "author.name")
-    Book toEntity(BookDTO bookDTO, Author author);
+    default Book toEntity(BookDTO bookDTO, Author author) {
+        Book book = new Book();
+        author.setName(bookDTO.getAuthorName());
+        book.setAuthor(author);
+        book.setIsbn(bookDTO.getIsbn());
+        book.setTitle(bookDTO.getTitle());
+        book.setPublicationYear(bookDTO.getPublicationYear());
+        return book;
+    }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBookFromDTO(BookDTO bookDTO, @MappingTarget Book book);

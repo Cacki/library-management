@@ -1,7 +1,7 @@
 package com.librarymanagement.service;
 
-import com.librarymanagement.entity.Loan;
-import com.librarymanagement.repository.LoanRepository;
+import com.librarymanagement.data.entity.Loan;
+import com.librarymanagement.data.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

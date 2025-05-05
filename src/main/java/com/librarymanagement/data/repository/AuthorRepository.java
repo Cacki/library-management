@@ -1,6 +1,6 @@
-package com.librarymanagement.repository;
+package com.librarymanagement.data.repository;
 
-import com.librarymanagement.entity.Author;
+import com.librarymanagement.data.entity.Author;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

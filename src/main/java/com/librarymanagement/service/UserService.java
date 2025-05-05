@@ -1,7 +1,7 @@
 package com.librarymanagement.service;
 
-import com.librarymanagement.entity.User;
-import com.librarymanagement.repository.UserRepository;
+import com.librarymanagement.data.entity.User;
+import com.librarymanagement.data.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,7 @@
 package com.librarymanagement.controller;
 
 import com.librarymanagement.dto.BookDTO;
+import com.librarymanagement.exception.DuplicateResourceException;
 import com.librarymanagement.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/books")
@@ -39,10 +41,24 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<BookDTO>> searchBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String authorName,
+            @RequestParam(required = false) Integer year,
+            Pageable pageable) {
+        Page<BookDTO> bookDTOS = service.searchBooks(title, authorName, year, pageable);
+        return ResponseEntity.ok(bookDTOS);
+    }
+
     @PostMapping
-    public ResponseEntity<BookDTO> addBook(@Valid @RequestBody BookDTO bookDTO) {
+    public ResponseEntity<BookDTO> addBook(@Valid @RequestBody BookDTO bookDTO) throws DuplicateResourceException {
         BookDTO createdBook = service.addBook(bookDTO);
-        return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("{id}")
+                .buildAndExpand(createdBook.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(createdBook);
     }
 
     @GetMapping("/{id}")
